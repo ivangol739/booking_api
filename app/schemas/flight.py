@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -10,6 +11,7 @@ class FlightBase(BaseModel):
     arrival_time: datetime
     price: float
     available_seats: int
+
 
 class FlightCreate(FlightBase):
     pass
