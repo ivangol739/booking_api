@@ -16,4 +16,4 @@ class Flight(Base):
     available_seats = Column(Integer, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
 
-    bookings = relationship("Booking", back_populates="flights")
+    bookings = relationship("Booking", back_populates="flight")

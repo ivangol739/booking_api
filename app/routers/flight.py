@@ -9,12 +9,14 @@ from app.backend.db_depends import get_db
 from app.schemas.flight import FlightBase, FlightCreate, FlightUpdate, FlightResponse
 from app.models.bookings import Booking
 from app.models.flight import Flight
+from sqlalchemy import select
 
 router = APIRouter(prefix='/flights', tags=['flights'])
 
 @router.get('/')
-async def get_all_flights():
-    pass
+async def get_all_flights(db: Annotated[AsyncSession, Depends(get_db)]):
+    flights = await db.scalars(select(Flight))
+    return flights.all()
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_data: FlightCreate):
@@ -35,10 +37,27 @@ async def create_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_dat
         'transaction': 'Successful'
     }
 
-@router.put('/')
-async def update_flight():
-    pass
+@router.put('/{flight_slug}')
+async def update_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slug: str, flight_data: FlightUpdate):
+    flight = await db.scalar(select(Flight).where(Flight.slug == flight_slug))
+    if flight is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Flight not found')
 
-@router.delete('/')
-async def delete_flight():
-    pass
+    flight.price = flight_data.price
+    flight.available_seats = flight_data.available_seats
+
+    await db.commit()
+    return {
+        'status_code': status.HTTP_200_OK,
+        'transaction': 'Flight update is successful'
+    }
+
+
+@router.delete('/{flight_slug}')
+async def delete_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slug: str):
+    flight = await db.scalar(select(Flight).where(Flight.slug == flight_slug))
+    if flight is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Flight not found')
+
+    await db.delete(flight)
+    await db.commit()
