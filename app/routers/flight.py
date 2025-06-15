@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 from sqlalchemy import insert
-from slugify import slugify
 
 from app.backend.db_depends import get_db
 from app.schemas.flight import FlightBase, FlightCreate, FlightUpdate, FlightResponse
-from app.models.bookings import Booking
 from app.models.flight import Flight
 from sqlalchemy import select
+
+from slugify import slugify
+from datetime import datetime
 
 router = APIRouter(prefix='/flights', tags=['flights'])
 
@@ -61,3 +61,7 @@ async def delete_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slu
 
     await db.delete(flight)
     await db.commit()
+    return {
+        'status_code': status.HTTP_200_OK,
+        'transaction': 'Flight delete is successful'
+    }
