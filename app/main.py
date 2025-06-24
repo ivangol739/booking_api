@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import flight, bookings
+from app.routers import flight, bookings, auth
 
 app = FastAPI(title="Flight Booking API")
 
@@ -9,4 +9,4 @@ async def welcome() -> dict:
 
 app.include_router(flight.router)
 app.include_router(bookings.router)
-
+app.include_router(auth.router)

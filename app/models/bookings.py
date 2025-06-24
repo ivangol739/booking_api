@@ -20,6 +20,5 @@ class Booking(Base):
     seats = Column(Integer, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
 
-    user = relationship("User", back_populates="bookings")
     flight = relationship("Flight", back_populates="bookings")
 
