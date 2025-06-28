@@ -21,7 +21,7 @@ async def all_bookings(db: Annotated[AsyncSession, Depends(get_db)]):
 
 @router.post('/')
 async def create_booking(db: Annotated[AsyncSession, Depends(get_db)], booking_data: BookingCreate, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin') or get_user.get('is_supplier'):
+    if get_user.get('is_admin') or get_user.get('is_customer'):
         flight = await db.scalar(select(Flight).where(Flight.id == booking_data.flight_id))
         if flight is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Flight not found')
@@ -72,7 +72,7 @@ async def booking_detail(db: Annotated[AsyncSession, Depends(get_db)] ,booking_s
 
 @router.put('/{booking_slug}')
 async def update_booking(db: Annotated[AsyncSession, Depends(get_db)], update_data: BookingUpdate, booking_slug: str, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin') or get_user.get('is_supplier'):
+    if get_user.get('is_admin') or get_user.get('is_customer'):
         booking = await db.scalar(select(Booking).where(Booking.slug == booking_slug))
         if booking is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Booking not found')
@@ -118,7 +118,7 @@ async def update_booking(db: Annotated[AsyncSession, Depends(get_db)], update_da
 
 @router.delete('/{booking_slug}')
 async def delete_booking(db: Annotated[AsyncSession, Depends(get_db)], booking_id: int, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin') or get_user.get('is_supplier'):
+    if get_user.get('is_admin') or get_user.get('is_customer'):
         booking = await db.get(Booking, booking_id)
         if booking is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Booking not found')

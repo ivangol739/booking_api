@@ -22,7 +22,7 @@ async def get_all_flights(db: Annotated[AsyncSession, Depends(get_db)]):
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_data: FlightCreate, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin'):
+    if get_user.get('is_admin') or get_user.get('is_supplier'):
         await db.execute(insert(Flight).values(
             flight_number=flight_data.flight_number,
             departure_city=flight_data.departure_city,
@@ -46,7 +46,7 @@ async def create_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_dat
 
 @router.put('/{flight_slug}')
 async def update_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slug: str, flight_data: FlightUpdate, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin'):
+    if get_user.get('is_admin') or get_user.get('is_supplier'):
         flight = await db.scalar(select(Flight).where(Flight.slug == flight_slug))
         if flight is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Flight not found')
@@ -68,7 +68,7 @@ async def update_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slu
 
 @router.delete('/{flight_slug}')
 async def delete_flight(db: Annotated[AsyncSession, Depends(get_db)], flight_slug: str, get_user: Annotated[dict, Depends(get_current_user)]):
-    if get_user.get('is_admin'):
+    if get_user.get('is_admin') or get_user.get('is_supplier'):
         flight = await db.scalar(select(Flight).where(Flight.slug == flight_slug))
         if flight is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Flight not found')
